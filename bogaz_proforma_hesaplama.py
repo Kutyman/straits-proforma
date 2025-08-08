@@ -24,8 +24,18 @@ with st.expander("🔧 Gemi Bilgileri ve Parametreler", expanded=True):
 
     with col2:
         cins = st.selectbox("Gemi Cinsi", ["TANKER", "LPG", "NÜKLEER", "TANKER/LPG", "LPG/ NÜKLEER", "RO-RO/KONT /DİGER"])
-        kalkis = st.text_input("Kalkış Limanı (ülke veya liman adı)", value="Yunanistan")
-        varis = st.text_input("Varış Limanı (ülke veya liman adı)", value="Samsun")
+        gecis_turu = st.selectbox(
+            "Geçiş Türü",
+            [
+                "1 - Full Transit Geçiş",
+                "2 - Marmara In",
+                "3 - Marmara Out",
+                "4 - Çanakkale In",
+                "5 - Çanakkale Out",
+                "6 - Serbest Geçiş"
+            ]
+        )
+        ugraksiz_mi = st.radio("Uğraksız (transit) geçiş mi?", ["Evet", "Hayır"], index=1) == "Evet"
 
     with col3:
         usd_try_kur = st.number_input("USD/TRY kuru", value=32.5)
@@ -35,23 +45,20 @@ with st.expander("🔧 Gemi Bilgileri ve Parametreler", expanded=True):
         kabotaj_mi = st.checkbox("Kabotaj seferi mi?", value=False)
         yolcu_gemisi_mi = st.checkbox("Yolcu gemisi mi?", value=False)
 
-# Uğraksız geçiş mi?
-ugraksiz_mi = kalkis != "" and varis != "" and kalkis.lower() != varis.lower() and not turk_bayrakli and not kabotaj_mi
-
 # Boğaz yönü belirleme
 bogaz_gecir = []
-kalkis_marmara = any(k in kalkis.lower() for k in ["tekirdag", "gemlik", "marmara", "istanbul", "yarimca", "izmit"])
-varis_marmara = any(k in varis.lower() for k in ["tekirdag", "gemlik", "marmara", "istanbul", "yarimca", "izmit"])
-
-if kalkis_marmara or varis_marmara:
-    if kalkis_marmara and not varis_marmara:
-        bogaz_gecir = ["istanbul"]
-    elif varis_marmara and not kalkis_marmara:
-        bogaz_gecir = ["çanakkale"]
-    else:
-        bogaz_gecir = []
-else:
+if "full" in gecis_turu.lower():
     bogaz_gecir = ["çanakkale", "istanbul"]
+elif "marmara in" in gecis_turu.lower():
+    bogaz_gecir = ["çanakkale"]
+elif "marmara out" in gecis_turu.lower():
+    bogaz_gecir = ["istanbul"]
+elif "çanakkale in" in gecis_turu.lower():
+    bogaz_gecir = ["çanakkale"]
+elif "çanakkale out" in gecis_turu.lower():
+    bogaz_gecir = ["çanakkale"]
+elif "serbest" in gecis_turu.lower():
+    bogaz_gecir = []
 
 # Tarifeyi belirle
 tarife_kodu = "yabanci"
@@ -88,3 +95,4 @@ if st.button("Hesapla"):
     st.write(f"Acentelik Ücreti: {acente} USD")
     st.write(f"Refakatli Geçiş Ek Acentelik Ücreti: {acente_refakat_usd} USD")
     st.write(f"Römorkör Ücreti (Toplam): {romorkor_toplam} USD")
+

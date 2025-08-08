@@ -153,7 +153,12 @@ if st.button("Hesapla"):
     saglik = hesapla_saglik_resmi(nrt)
     fener = hesapla_fener_ucreti(nrt, tarife_kodu, ugraksiz_mi)
     tahlisiye = hesapla_tahlisiye_ucreti(nrt, tarife_kodu, ugraksiz_mi)
-    kilavuz = hesapla_kilavuzluk(grt, "bogaz_gecisi")
+
+    kilavuz_toplam = 0.0
+    for b in bogaz_gecir:
+        tip = f"bogaz_{b}"
+        kilavuz_toplam += hesapla_kilavuzluk(grt, tip)
+
     acente_eur = hesapla_acente_ucreti(nrt)
     acente = round(acente_eur * eur_usd_kur, 2)
     acente_refakat = hesapla_acente_refakatli(acente_eur, refakat_var)
@@ -167,7 +172,7 @@ if st.button("Hesapla"):
     st.write(f"Sağlık Resmi: {saglik} USD")
     st.write(f"Fener Ücreti: {fener} USD")
     st.write(f"Tahlisiye Ücreti: {tahlisiye} USD")
-    st.write(f"Kılavuzluk Ücreti: {kilavuz} USD")
+    st.write(f"Kılavuzluk Ücreti (Toplam): {kilavuz_toplam} USD")
     st.write(f"Acentelik Ücreti: {acente} USD")
     st.write(f"Refakatli Geçiş Ek Acentelik Ücreti: {acente_refakat_usd} USD")
     st.write(f"Römorkör Ücreti (Toplam): {romorkor_toplam} USD")

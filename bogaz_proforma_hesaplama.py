@@ -10,9 +10,83 @@ romorkor_ist_df = pd.read_excel(excel_yolu, sheet_name="romorkor_istanbul")
 romorkor_can_df = pd.read_excel(excel_yolu, sheet_name="romorkor_canakkale")
 sabitler_df = pd.read_excel(excel_yolu, sheet_name="sabit_kalemler")
 
-# Fonksiyonlar
-# ... [Fonksiyonlar aynı şekilde korunuyor]
-# ...
+# === HESAPLAMA FONKSİYONLARI ===
+def hesapla_saglik_resmi(nrt):
+    katsayi = 0.43725
+    return round(katsayi * nrt, 2)
+
+def hesapla_fener_ucreti(nrt, tarife_kodu, ugraksiz):
+    if ugraksiz:
+        ilki = 2.4486
+        sonrasi = 1.2243
+    elif tarife_kodu == "yolcu":
+        ilki = 0.26136 * 0.73
+        sonrasi = 0.13068 * 0.73
+    elif tarife_kodu == "turk":
+        ilki = 0.26136 * 0.80
+        sonrasi = 0.13068 * 0.80
+    elif tarife_kodu == "kabotaj":
+        ilki = 0.066
+        sonrasi = 0.033
+    else:
+        ilki = 0.26136
+        sonrasi = 0.13068
+
+    if nrt <= 800:
+        return round(nrt * ilki, 2)
+    else:
+        return round((800 * ilki) + ((nrt - 800) * sonrasi), 2)
+
+def hesapla_tahlisiye_ucreti(nrt, tarife_kodu, ugraksiz):
+    if ugraksiz:
+        return round(nrt * 0.583, 2)
+    elif tarife_kodu == "yolcu":
+        return round(nrt * 0.09504 * 2, 2)
+    elif tarife_kodu == "turk":
+        return round(nrt * 0.104544 * 2, 2)
+    elif tarife_kodu == "kabotaj":
+        return round(nrt * 0.033 * 2, 2)
+    else:
+        return round(nrt * 0.13068 * 2, 2)
+
+def hesapla_kilavuzluk(grt, tip):
+    satir = kilavuzluk_df[kilavuzluk_df['tip'] == tip].iloc[0]
+    taban = satir['taban']
+    ek = satir['ek']
+    ilave = math.ceil(grt / 1000) - 1
+    return round(taban + max(0, ilave) * ek, 2)
+
+def hesapla_acente_ucreti(nrt):
+    if nrt <= 1000:
+        return 200
+    elif nrt <= 2000:
+        return 290
+    elif nrt <= 3000:
+        return 340
+    elif nrt <= 4000:
+        return 400
+    elif nrt <= 5000:
+        return 460
+    elif nrt <= 7500:
+        return 560
+    elif nrt <= 10000:
+        return 640
+    elif nrt <= 20000:
+        return 640 + ((nrt - 10000) / 1000) * 30
+    elif nrt <= 30000:
+        return 640 + (10000 / 1000 * 30) + ((nrt - 20000) / 1000) * 20
+    else:
+        return 640 + (10000 / 1000 * 30) + (10000 / 1000 * 20) + ((nrt - 30000) / 1000) * 10
+
+def hesapla_acente_refakatli(ana_ucret, refakat_var):
+    return round(ana_ucret * 1.3 if refakat_var else ana_ucret, 2)
+
+def hesapla_romorkor(boy, cins, bogaz):
+    df = romorkor_ist_df if bogaz == "istanbul" else romorkor_can_df
+    satir = df[(df['min_boy'] <= boy) & (df['max_boy'] >= boy) & (df['cins'] == cins)]
+    if not satir.empty:
+        return float(satir.iloc[0]['ucret'])
+    return 0.0
 
 # Kullanıcı seçimlerini yansıtan durumları al
 st.set_page_config(layout="wide")

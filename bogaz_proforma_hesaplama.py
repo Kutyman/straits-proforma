@@ -50,7 +50,11 @@ def hesapla_tahlisiye_ucreti(nrt, tarife_kodu, ugraksiz):
         return round(nrt * 0.13068 * 2, 2)
 
 def hesapla_kilavuzluk(grt, tip):
-    satir = kilavuzluk_df[kilavuzluk_df['tip'] == tip].iloc[0]
+    eslesen = kilavuzluk_df[kilavuzluk_df['tip'] == tip]
+    if eslesen.empty:
+        st.warning(f"Kılavuzluk tarifesi bulunamadı: {tip}")
+        return 0.0
+    satir = eslesen.iloc[0]
     taban = satir['taban']
     ek = satir['ek']
     ilave = math.ceil(grt / 1000) - 1
@@ -176,3 +180,5 @@ if st.button("Hesapla"):
     st.write(f"Acentelik Ücreti: {acente} USD")
     st.write(f"Refakatli Geçiş Ek Acentelik Ücreti: {acente_refakat_usd} USD")
     st.write(f"Römorkör Ücreti (Toplam): {romorkor_toplam} USD")
+
+

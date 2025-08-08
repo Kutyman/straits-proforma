@@ -11,20 +11,28 @@ romorkor_can_df = pd.read_excel(excel_yolu, sheet_name="romorkor_canakkale")
 sabitler_df = pd.read_excel(excel_yolu, sheet_name="sabit_kalemler")
 
 # Kullanıcı seçimlerini yansıtan durumları al
+st.set_page_config(layout="wide")
 st.title("Boğaz Geçişi Proforma Hesaplama")
 
-nrt = st.number_input("NRT (Net Register Tonnage)", value=1500)
-grt = st.number_input("GRT (Gross Register Tonnage)", value=2500)
-boy = st.number_input("Gemi Boyu (metre)", value=180.0)
-cins = st.selectbox("Gemi Cinsi", ["TANKER", "LPG", "NÜKLEER", "TANKER/LPG", "LPG/ NÜKLEER", "RO-RO/KONT /DİGER"])
-bogaz = st.selectbox("Boğaz", ["istanbul", "çanakkale"])
-usd_try_kur = st.number_input("USD/TRY kuru", value=32.5)
-eur_usd_kur = st.number_input("EUR/USD kuru", value=1.08)
-refakat_var = st.checkbox("Refakatli geçiş mi?", value=True)
-turk_bayrakli = st.checkbox("Türk bayraklı mı?", value=False)
-kabotaj_mi = st.checkbox("Kabotaj seferi mi?", value=False)
-ugraksiz_mi = st.checkbox("Uğraksız geçiş mi? (foreign to foreign)", value=True)
-yolcu_gemisi_mi = st.checkbox("Yolcu gemisi mi?", value=False)
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    nrt = st.number_input("NRT (Net Register Tonnage)", value=1500)
+    grt = st.number_input("GRT (Gross Register Tonnage)", value=2500)
+    boy = st.number_input("Gemi Boyu (metre)", value=180.0)
+
+with col2:
+    cins = st.selectbox("Gemi Cinsi", ["TANKER", "LPG", "NÜKLEER", "TANKER/LPG", "LPG/ NÜKLEER", "RO-RO/KONT /DİGER"])
+    bogaz = st.selectbox("Boğaz", ["istanbul", "çanakkale"])
+    usd_try_kur = st.number_input("USD/TRY kuru", value=32.5)
+
+with col3:
+    eur_usd_kur = st.number_input("EUR/USD kuru", value=1.08)
+    refakat_var = st.checkbox("Refakatli geçiş mi?", value=True)
+    turk_bayrakli = st.checkbox("Türk bayraklı mı?", value=False)
+    kabotaj_mi = st.checkbox("Kabotaj seferi mi?", value=False)
+    ugraksiz_mi = st.checkbox("Uğraksız geçiş mi? (foreign to foreign)", value=True)
+    yolcu_gemisi_mi = st.checkbox("Yolcu gemisi mi?", value=False)
 
 # Tarifeyi belirle
 tarife_kodu = "yabanci"
@@ -36,7 +44,6 @@ elif yolcu_gemisi_mi:
     tarife_kodu = "yolcu"
 
 # Fonksiyonlar
-
 def sabit_deger(kalem_adi):
     row = sabitler_df[sabitler_df["kalem"] == kalem_adi]
     return float(row["deger"].values[0]) if not row.empty else 0.0
@@ -127,3 +134,4 @@ if st.button("Hesapla"):
     st.write(f"Acentelik Ücreti: {acente} USD")
     st.write(f"Refakatli Geçiş Ek Acentelik Ücreti: {acente_refakat_usd} USD")
     st.write(f"Römorkör Ücreti ({bogaz.title()} Boğazı, {cins}, {boy} m): {romorkor} USD")
+
